@@ -1,2 +1,3 @@
 # gceReportConverter
-一个将Greenbone Community Edition的xml格式扫描报告转换成html格式的工具
+一个将Greenbone Community Edition的xml格式扫描报告转换成html格式的工具，并汉化
+PS：汉化目前基于Google翻译接口，你需要在本地10809端口有个http协议的上网工具
