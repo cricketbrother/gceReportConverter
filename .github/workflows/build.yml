@@ -32,9 +32,6 @@ jobs:
                 go-version: 'stable'
                 check-latest: true
 
-            - name: Download Dependencies
-              run: go mod init gceReportConverter && go mod tidy
-
             - name: Build
               run: |
                 GOOS=darwin GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.darwin.amd64.${{ steps.tag.outputs.tag }} ./
