@@ -21,7 +21,12 @@ func time2beijing(s string) string {
 	} else {
 		t, _ = time.Parse("2006-01-02T15:04:05-07:00", s)
 	}
-	loc, _ := time.LoadLocation("Asia/Shanghai")
+
+	loc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		loc = time.FixedZone("CST", 8*60*60)
+	}
+
 	return t.In(loc).Format("2006-01-02 15:04:05")
 }
 
