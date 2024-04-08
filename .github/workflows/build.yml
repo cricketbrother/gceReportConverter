@@ -39,9 +39,7 @@ jobs:
               run: |
                 GOOS=darwin GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.darwin.amd64.${{ steps.tag.outputs.tag }} ./
                 GOOS=darwin GOARCH=arm64 go build -o ./bin/checkKnownsecNodeIP.darwin.arm64.${{ steps.tag.outputs.tag }} ./
-                GOOS=linux GOARCH=386 go build -o ./bin/checkKnownsecNodeIP.linux.386.${{ steps.tag.outputs.tag }} ./
                 GOOS=linux GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.linux.amd64.${{ steps.tag.outputs.tag }} ./
-                GOOS=windows GOARCH=386 go build -o ./bin/checkKnownsecNodeIP.windows.386.${{ steps.tag.outputs.tag }}.exe ./
                 GOOS=windows GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.windows.amd64.${{ steps.tag.outputs.tag }}.exe ./
 
             - name: Upload Release Assets
