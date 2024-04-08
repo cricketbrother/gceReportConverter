@@ -1,0 +1,51 @@
+name: Auto Build
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set Timezone
+              run: |
+                sudo -E timedatectl set-timezone Asia/Shanghai
+
+            - name: Set Tag
+              id: tag
+              run: |
+                tag=$(date +"v%Y%m%d%H%M%S")
+                echo "tag=$tag" >> $GITHUB_OUTPUT
+
+            - name: Checkout
+              uses: actions/checkout@v3
+
+            - name: Setup Go
+              uses: actions/setup-go@v4
+              with:
+                go-version: 'stable'
+                check-latest: true
+
+            - name: Build
+              run: |
+                GOOS=darwin GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.darwin.amd64.${{ steps.tag.outputs.tag }} ./
+                GOOS=darwin GOARCH=arm64 go build -o ./bin/checkKnownsecNodeIP.darwin.arm64.${{ steps.tag.outputs.tag }} ./
+                GOOS=linux GOARCH=386 go build -o ./bin/checkKnownsecNodeIP.linux.386.${{ steps.tag.outputs.tag }} ./
+                GOOS=linux GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.linux.amd64.${{ steps.tag.outputs.tag }} ./
+                GOOS=windows GOARCH=386 go build -o ./bin/checkKnownsecNodeIP.windows.386.${{ steps.tag.outputs.tag }}.exe ./
+                GOOS=windows GOARCH=amd64 go build -o ./bin/checkKnownsecNodeIP.windows.amd64.${{ steps.tag.outputs.tag }}.exe ./
+
+            - name: Upload Release Assets
+              uses: softprops/action-gh-release@v1
+              with:
+                files: bin/*
+                tag_name: ${{ steps.tag.outputs.tag }}
+                draft: false
+                prerelease: false
+                generate_release_notes: true

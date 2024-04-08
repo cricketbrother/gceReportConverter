@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Greenbone Community Edition - 漏洞扫描报告</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <P class="fs-1 text-center fw-bold">漏洞扫描报告</P>
+                <p class="fs-4 text-center fw-bold">扫描时间：{{ .Date }}</p>
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <p class="d-inline p-2 bg-primary text-center text-white fw-bold">一、结果概览</p>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p>扫描开始时间：</p>
+                </div>
+                <div class="col-10">
+                    <p>{{ .ScanStart }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p>扫描结束时间：</p>
+                </div>
+                <div class="col-10">
+                    <p>{{ .ScanEnd }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p>扫描主机数：</p>
+                </div>
+                <div class="col-10">
+                    <p>{{ .BaseInfo.Hosts }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p>存在漏洞主机数：</p>
+                </div>
+                <div class="col-10">
+                    <p>{{ .BaseInfo.VulHosts }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-2">
+                    <p>结果总数：</p>
+                </div>
+                <div class="col-10">
+                    <p>{{ .BaseInfo.TotalResults }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-center">
+                    <p class="flex-fill bg-danger text-center text-white fw-bold">高危项：{{ .BaseInfo.High}}</p>
+                    <p class="flex-fill bg-warning text-center text-white fw-bold">中危项：{{ .BaseInfo.Medium}}</p>
+                    <p class="flex-fill bg-info text-center text-white fw-bold">低危项：{{ .BaseInfo.Low}}</p>
+                    <p class="flex-fill bg-secondary text-center text-white fw-bold">信息项：{{ .BaseInfo.Log}}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p>分布情况：</p>
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center">主机IP</th>
+                                <th class="text-center">高危</th>
+                                <th class="text-center">中危</th>
+                                <th class="text-center">低危</th>
+                                <th class="text-center">信息</th>
+                                <th class="text-center">结果总数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range .BaseInfo.VulHostsInfo }}
+                            <tr>
+                                <td class="text-center"><a href="./host/{{ .IP }}.html" target="_blank"
+                                        rel="noopener">{{ .IP }}</a></td>
+                                <td class="text-center">{{ .High }}</td>
+                                <td class="text-center">{{ .Medium }}</td>
+                                <td class="text-center">{{ .Low }}</td>
+                                <td class="text-center">{{ .Log }}</td>
+                                <td class="text-center">{{ .TotalResults }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <p class="d-inline p-2 bg-primary text-center text-white fw-bold">二、详细结果</p>
+            </div>
+            <!-- 可展开的表格 -->
+            <table class="table table-hover table-sm table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-nowrap text-center">序号</th>
+                        <th class="text-nowrap text-center">检测项名称</th>
+                        <th class="text-nowrap text-center">主机IP</th>
+                        <th class="text-nowrap text-center">端口</th>
+                        <th class="text-nowrap text-center">威胁等级</th>
+                        <th class="text-nowrap text-center">解决方案类型</th>
+                        <th class="text-nowrap text-center">解决方案</th>
+                        <th class="text-nowrap text-center">详细信息</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ $index := 1}}
+                    {{ range .Results }}
+                    <tr data-bs-toggle="collapse" data-bs-target="#demo1" class="accordion-toggle">
+                        <td class="text-center">{{ $index }}</td>
+                        <td sclass="text-left">{{ .NameCN }}</td>
+                        <td class="text-center">{{ .IP }}</td>
+                        <td class="text-center">{{ .Port }}</td>
+                        <td class="text-nowrap text-center {{ ColorByThreat .Threat }}">{{ .Threat }} / {{ .Severity }}
+                        </td>
+                        <td class="text-center">{{ .SolutionTypeCN }}</td>
+                        <td class="text-left">{{ ReplaceNewlineChar .SolutionCN }}</td>
+                        <td class="text-center"><button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#{{ .ResultID }}">查看</button></td>
+                        <div class="modal fade" id="{{ .ResultID }}" data-bs-backdrop="static" data-bs-keyboard="false"
+                            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel">
+                                            <P class="text-left fw-bold">{{ .NameCN }}</P>
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <P class="fs-4 text-left fw-bold">摘要</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .SummaryCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">家族</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .FamilyCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">洞察</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .InsightCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">受影响的软件或操作系统</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .AffectedCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">危害</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .ImpactCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">评分</P>
+                                        <p class="fs-6 text-left">CVSS Base: {{ .CVSSBase }}</p>
+                                        <p class="fs-6 text-left">CVSS Base Vector: {{ .CVSSBaseVector }}</p>
+                                        <P class="fs-4 text-left fw-bold">产品检测结果</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .Detection }}</p>
+                                        <P class="fs-4 text-left fw-bold">检查结果描述</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .DescriptionCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">检查方法</P>
+                                        <p class="fs-6 text-left">{{ ReplaceNewlineChar .VulDetectCN }}</p>
+                                        <P class="fs-4 text-left fw-bold">参考链接</P>
+                                        <p class="fs-6 text-left">{{ SetRefsLink .Refs }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary"
+                                            data-bs-dismiss="modal">关闭</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </tr>
+                    {{ $index = Increase $index}}
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+</body>
+
+</html>
